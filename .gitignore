@@ -20,3 +20,6 @@ coverage.xml
 .DS_Store
 .vscode/
 .idea/
+uploaded_docs/
+uploaded_html/
+chroma_store/ 

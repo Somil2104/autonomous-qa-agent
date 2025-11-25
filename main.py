@@ -1,4 +1,5 @@
 import os
+import logging
 from fastapi import FastAPI, UploadFile, File, HTTPException, Body
 from typing import List
 from pydantic import BaseModel
@@ -9,6 +10,11 @@ from utils.knowledge_base import build_knowledge_base
 from utils.rag_generation import generate_grounded_test_cases
 from utils.selenium_generator import generate_selenium_script
 
+logging.basicConfig(level=logging.INFO)
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+logging.info(f"GEMINI_API_KEY is set: {'Yes' if GEMINI_API_KEY else 'No'}")
+
 app = FastAPI(title="Autonomous QA Agent")
 
 DOCS_DIR = "uploaded_docs"
@@ -17,9 +23,11 @@ HTML_DIR = "uploaded_html"
 os.makedirs(DOCS_DIR, exist_ok=True)
 os.makedirs(HTML_DIR, exist_ok=True)
 
+
 @app.get("/")
 def read_root():
     return {"message": "Autonomous QA Agent Backend is running!"}
+
 
 @app.post("/upload/documentation/")
 async def upload_documentation(file: UploadFile = File(...)):
@@ -29,6 +37,7 @@ async def upload_documentation(file: UploadFile = File(...)):
         f.write(contents)
     return {"filename": file.filename, "message": "Documentation uploaded successfully"}
 
+
 @app.post("/upload/html/")
 async def upload_html(file: UploadFile = File(...)):
     file_location = os.path.join(HTML_DIR, file.filename)
@@ -37,20 +46,26 @@ async def upload_html(file: UploadFile = File(...)):
         f.write(contents)
     return {"filename": file.filename, "message": "HTML file uploaded successfully"}
 
+
 class TestCaseRequest(BaseModel):
     user_query: str
+
 
 class TestCaseResponse(BaseModel):
     test_cases: str
     status: str
 
+
 @app.post("/generate-test-cases/", response_model=TestCaseResponse)
 async def generate_test_cases(request: TestCaseRequest):
     try:
+        if not GEMINI_API_KEY:
+            raise HTTPException(status_code=500, detail="GEMINI_API_KEY not set")
         test_cases = generate_grounded_test_cases(request.user_query)
         return TestCaseResponse(test_cases=test_cases, status="success")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/generate-selenium-script/")
 async def get_selenium_script(test_case_title: str, test_case_description: str):
@@ -59,6 +74,7 @@ async def get_selenium_script(test_case_title: str, test_case_description: str):
         return {"selenium_script": script_content}
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+
 
 @app.get("/download-selenium-script/")
 async def download_selenium_script(
@@ -80,6 +96,7 @@ async def download_selenium_script(
         background=None
     )
 
+
 @app.post("/build-knowledge-base/")
 async def build_kb_endpoint(
     documentation_filenames: List[str] = Body(...), 
@@ -87,22 +104,22 @@ async def build_kb_endpoint(
 ):
     docs_text = []
 
-    # Load documentation files with existence check and debug logging
+    # Load documentation files
     for filename in documentation_filenames:
         filepath = os.path.join(DOCS_DIR, filename)
-        print(f"Loading documentation file: {filepath} (exists: {os.path.exists(filepath)})")
+        logging.info(f"Loading documentation file: {filepath} (exists: {os.path.exists(filepath)})")
         if not os.path.exists(filepath):
             raise HTTPException(status_code=404, detail=f"Documentation file not found: {filename}")
-        text = read_documentation_files([filename])  # Ensure read_documentation_files reads from DOCS_DIR
+        text = read_documentation_files([filename])
         docs_text.append({"text": text, "source": filename})
 
-    # Load HTML files similarly
+    # Load HTML files
     for filename in html_filenames:
         filepath = os.path.join(HTML_DIR, filename)
-        print(f"Loading HTML file: {filepath} (exists: {os.path.exists(filepath)})")
+        logging.info(f"Loading HTML file: {filepath} (exists: {os.path.exists(filepath)})")
         if not os.path.exists(filepath):
             raise HTTPException(status_code=404, detail=f"HTML file not found: {filename}")
-        text = read_html_files([filename])  # Ensure read_html_files reads from HTML_DIR
+        text = read_html_files([filename])
         docs_text.append({"text": text, "source": filename})
 
     vectordb = build_knowledge_base(docs_text)

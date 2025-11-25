@@ -1,33 +1,59 @@
 import os
+import logging
+from langchain_chroma import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
 import requests
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import Chroma
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 CHROMA_PERSIST_DIR = "chroma_store"
-HF_API_TOKEN = os.getenv("HF_API_TOKEN")  # Hugging Face API token from environment
-HF_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-large"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")  # Gemini Studio API token from environment
 
 embed_model = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
 vectordb = Chroma(persist_directory=CHROMA_PERSIST_DIR, embedding_function=embed_model)
 
-def query_hf_model(payload: dict) -> str:
-    headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
-    response = requests.post(HF_API_URL, headers=headers, json=payload, timeout=30)
+# Updated Gemini official API endpoint as per Gemini 3 Developer Guide
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent"
+
+def query_gemini_model(prompt: str) -> str:
+    logging.info("Starting Gemini API call...")
+    headers = {
+        "x-goog-api-key": GEMINI_API_KEY,
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "contents": [
+            {
+                "parts": [{"text": prompt}]
+            }
+        ],
+        "temperature": 1.0,
+        "candidateCount": 1,
+        "topP": 1,
+        "topK": 40,
+        "maxOutputTokens": 1024,
+        "stopSequences": [],
+        # You can optionally add thinking_level and other parameters here per docs
+        # "thinkingLevel": "high",
+    }
+    response = requests.post(GEMINI_API_URL, headers=headers, json=payload, timeout=30)
     response.raise_for_status()
-    output = response.json()
-    if isinstance(output, list) and len(output) > 0 and "generated_text" in output[0]:
-        return output[0]["generated_text"]
-    return str(output)
+    data = response.json()
+    logging.info("Gemini API call completed.")
+    # Extract generated text from response structure
+    if "candidates" in data and len(data["candidates"]) > 0:
+        return data["candidates"][0].get("content", "")
+    return ""
 
 def generate_grounded_test_cases(user_query: str, top_k: int = 5) -> str:
-    # Retrieve top_k relevant document chunks
     retriever = vectordb.as_retriever(search_kwargs={"k": top_k})
     relevant_docs = retriever.get_relevant_documents(user_query)
     context = "\n\n".join(doc.page_content for doc in relevant_docs)
 
-    # If no token, serve mock data for dev/demo
-    if not HF_API_TOKEN:
+    if not GEMINI_API_KEY:
+        logging.info("GEMINI_API_KEY not found: using mock test case output")
         return """
         [
           {
@@ -39,7 +65,6 @@ def generate_grounded_test_cases(user_query: str, top_k: int = 5) -> str:
         ]
         """
 
-    # Construct prompt for real API call
     prompt = (
         "You are an expert QA test case generator.\n"
         "Create structured test cases with IDs, titles, descriptions, and source document references.\n"
@@ -48,5 +73,9 @@ def generate_grounded_test_cases(user_query: str, top_k: int = 5) -> str:
         f"User query:\n{user_query}\n\n"
         "Respond ONLY with well-formed JSON."
     )
-    payload = {"inputs": prompt}
-    return query_hf_model(payload)
+
+    try:
+        return query_gemini_model(prompt)
+    except Exception as e:
+        logging.error(f"Gemini API call failed: {e}")
+        raise
