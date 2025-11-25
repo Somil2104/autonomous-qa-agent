@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-BACKEND_URL = "http://127.0.0.1:8000"  # Adjust if backend is hosted elsewhere
+BACKEND_URL = "http://127.0.0.1:8000"  # Adjust if backend is elsewhere
 
 st.title("Autonomous QA Agent")
 
@@ -22,8 +22,9 @@ if st.button("Upload Selected Files"):
     if (not uploaded_docs or len(uploaded_docs) == 0) and not uploaded_html:
         st.warning("Please select files to upload.")
     else:
-        for file in (uploaded_docs if uploaded_docs else []) + ([uploaded_html] if uploaded_html else []):
-            files = {'file': (file.name, file.getvalue())}
+        files_to_upload = (uploaded_docs if uploaded_docs else []) + ([uploaded_html] if uploaded_html else [])
+        for file in files_to_upload:
+            files = {'file': (file.name, file.getvalue())}  # Correct getvalue() casing
             url = f"{BACKEND_URL}/upload/html/" if file.name.endswith(".html") else f"{BACKEND_URL}/upload/documentation/"
             try:
                 with st.spinner(f"Uploading {file.name}..."):

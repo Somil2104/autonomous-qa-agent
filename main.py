@@ -28,24 +28,22 @@ os.makedirs(HTML_DIR, exist_ok=True)
 def read_root():
     return {"message": "Autonomous QA Agent Backend is running!"}
 
-# ---------------------- Upload Endpoints ---------------------- #
 @app.post("/upload/documentation/")
 async def upload_documentation(file: UploadFile = File(...)):
     file_location = os.path.join(DOCS_DIR, file.filename)
+    contents = await file.read()
     with open(file_location, "wb") as f:
-        contents = await file.read()
         f.write(contents)
     return {"filename": file.filename, "message": "Documentation uploaded successfully"}
 
 @app.post("/upload/html/")
 async def upload_html(file: UploadFile = File(...)):
     file_location = os.path.join(HTML_DIR, file.filename)
+    contents = await file.read()
     with open(file_location, "wb") as f:
-        contents = await file.read()
         f.write(contents)
     return {"filename": file.filename, "message": "HTML file uploaded successfully"}
 
-# ---------------------- Test Case Endpoints ---------------------- #
 class TestCaseRequest(BaseModel):
     user_query: str
 
@@ -59,7 +57,6 @@ async def generate_test_cases(request: TestCaseRequest):
         if not GEMINI_API_KEY:
             raise HTTPException(status_code=500, detail="GEMINI_API_KEY not set")
         test_cases = generate_grounded_test_cases(request.user_query)
-        # Ensure JSON serializable
         if not isinstance(test_cases, str):
             import json
             test_cases = json.dumps(test_cases, indent=2)
@@ -82,7 +79,6 @@ async def download_selenium_script(test_case_title: str, test_case_description: 
         safe_title = test_case_title.lower().replace(" ", "_")
         filename = f"{safe_title}_selenium_test.py"
 
-        # Use tempfile to avoid /tmp issues
         with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as tmp_file:
             tmp_file.write(script_content.encode())
             filepath = tmp_file.name
@@ -95,16 +91,14 @@ async def download_selenium_script(test_case_title: str, test_case_description: 
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
-# ---------------------- Knowledge Base ---------------------- #
 @app.post("/build-knowledge-base/")
 async def build_kb_endpoint(
-    documentation_filenames: List[str] = Body(...), 
-    html_filenames: List[str] = Body(...)
+    documentation_filenames: List[str] = Body(...),
+    html_filenames: List[str] = Body(...),
 ):
     try:
         docs_text = []
 
-        # Load documentation files
         for filename in documentation_filenames:
             filepath = os.path.join(DOCS_DIR, filename)
             logging.info(f"Loading documentation file: {filepath} (exists: {os.path.exists(filepath)})")
@@ -113,7 +107,6 @@ async def build_kb_endpoint(
             text = read_documentation_files([filename])
             docs_text.append({"text": text, "source": filename})
 
-        # Load HTML files
         for filename in html_filenames:
             filepath = os.path.join(HTML_DIR, filename)
             logging.info(f"Loading HTML file: {filepath} (exists: {os.path.exists(filepath)})")
@@ -124,14 +117,17 @@ async def build_kb_endpoint(
 
         vectordb = build_knowledge_base(docs_text)
 
-        # Get number of vectors safely
-        vector_count = getattr(vectordb._collection, "count", lambda: 0)()
+        # Safely get vector count, fallback 0 if unavailable
+        vector_count = 0
+        try:
+            vector_count = vectordb._collection.count()
+        except Exception:
+            pass
 
         return {
             "status": "success",
             "doc_count": len(docs_text),
             "vector_count": vector_count
         }
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

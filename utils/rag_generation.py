@@ -1,13 +1,11 @@
 import os
 import logging
-from langchain.vectorstores import Chroma
-from langchain.llms import HuggingFaceHub
-from langchain.embeddings import HuggingFaceEmbeddings
-
+from typing import Optional
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
 import requests
 import json
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
@@ -17,9 +15,12 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")  # Gemini Studio API token from env
 embed_model = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
 vectordb = Chroma(persist_directory=CHROMA_PERSIST_DIR, embedding_function=embed_model)
 
-# Use Gemini 2.5 Flash model endpoint for best free tier compatibility
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+
 def query_gemini_model(prompt: str) -> str:
+    """
+    Call Gemini API with the provided prompt and return the raw content response.
+    """
     logging.info("Starting Gemini API call...")
     headers = {
         "x-goog-api-key": GEMINI_API_KEY,
@@ -30,9 +31,13 @@ def query_gemini_model(prompt: str) -> str:
             {
                 "parts": [{"text": prompt}]
             }
-        ]
+        ],
+        "generationConfig": {  # Added generationConfig for proper response management
+            "temperature": 0.7,
+            "max_output_tokens": 1024,
+            "responseMimeType": "application/json"
+        }
     }
-
     logging.debug(f"Gemini API Payload: {json.dumps(payload, indent=2)}")
 
     response = requests.post(GEMINI_API_URL, headers=headers, json=payload, timeout=30)
@@ -52,11 +57,27 @@ def query_gemini_model(prompt: str) -> str:
         return str(content)
     return ""
 
-def generate_grounded_test_cases(user_query: str, top_k: int = 5) -> str:
-    retriever = vectordb.as_retriever(search_kwargs={"k": top_k})
-    # For future compatibility: consider switching from deprecated get_relevant_documents() to invoke() as needed
 
-    relevant_docs = retriever.get_relevant_documents(user_query)
+def generate_grounded_test_cases(user_query: str, top_k: int = 5) -> Optional[str]:
+    """
+    Retrieve relevant documents and generate grounded test cases from Gemini API.
+
+    Args:
+        user_query: The user query string describing test case needs.
+        top_k: Number of top relevant docs to retrieve.
+
+    Returns:
+        JSON string of generated test cases.
+    """
+    retriever = vectordb.as_retriever(search_kwargs={"k": top_k})
+
+    # Updated method usage: consider switching to invoke() in future LangChain versions
+    try:
+        relevant_docs = retriever.get_relevant_documents(user_query)
+    except AttributeError:
+        # fallback or migration path if get_relevant_documents deprecated
+        relevant_docs = retriever.invoke(user_query)  # Adjust this based on actual LangChain version
+
     context = "\n\n".join(doc.page_content for doc in relevant_docs)
 
     if not GEMINI_API_KEY:
@@ -85,4 +106,4 @@ def generate_grounded_test_cases(user_query: str, top_k: int = 5) -> str:
         return query_gemini_model(prompt)
     except Exception as e:
         logging.error(f"Error generating test cases: {e}")
-        raise
+        return None
