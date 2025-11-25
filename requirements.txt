@@ -1,3 +1,13 @@
-fastapi
-uvicorn[standard]
-python-multipart
+fastapi==0.122.0
+uvicorn[standard]==0.38.0
+python-multipart==0.0.20
+langchain
+chromadb
+sentence-transformers
+pydantic==2.12.4
+python-dotenv
+requests
+httpx
+psycopg2-binary
+gunicorn
+typing_extensions
