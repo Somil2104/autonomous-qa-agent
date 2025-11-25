@@ -20,3 +20,5 @@ def read_html_files(filenames: list) -> str:
         with open(file_path, "r", encoding="utf-8") as f:
             combined_html += f.read() + "\n"
     return combined_html
+
+

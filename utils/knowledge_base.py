@@ -62,3 +62,4 @@ if __name__ == "__main__":
 
     vectordb = build_knowledge_base(docs)
     print(f"Vector store built and persisted with {len(vectordb)} vectors.")
+

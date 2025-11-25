@@ -17,7 +17,7 @@ KEYWORD_GROUPS = {
     "registration": ["register", "sign up", "create account", "signup"],
 }
 
-# Define labels for zero-shot classification (customize as needed)
+# Define labels for zero-shot classification
 ZS_LABELS = list(KEYWORD_GROUPS.keys())
 
 def keyword_present(text: str, keywords: List[str]) -> bool:
@@ -94,4 +94,4 @@ def generate_advanced_test_cases(doc_text: str, html_text: str) -> List[TestCase
             description="No features identified; consider adding manual test cases."
         )
 
-    return list(unique_cases.values())
+    return list(unique_cases.values())  # Fixed closing parenthesis

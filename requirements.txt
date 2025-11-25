@@ -15,3 +15,5 @@ psycopg2-binary
 gunicorn
 typing_extensions
 dataclasses-json>=0.6.7,<0.7.0
+selenium
+streamlit

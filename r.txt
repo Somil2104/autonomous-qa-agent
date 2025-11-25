@@ -1,0 +1,155 @@
+```json
+{
+  "test_cases": [
+    {
+      "id": "UI_BUTTON_001",
+      "title": "Verify Button Styling - Background Color",
+      "description": "Ensure all button elements have a background color of #2a9d8f (teal).",
+      "source_document_reference": "CSS for 'button', line: background-color: #2a9d8f;"
+    },
+    {
+      "id": "UI_BUTTON_002",
+      "title": "Verify Button Styling - Text Color",
+      "description": "Ensure all button elements have white text color.",
+      "source_document_reference": "CSS for 'button', line: color: white;"
+    },
+    {
+      "id": "UI_BUTTON_003",
+      "title": "Verify Button Styling - Border",
+      "description": "Ensure all button elements do not have a visible border.",
+      "source_document_reference": "CSS for 'button', line: border: none;"
+    },
+    {
+      "id": "UI_BUTTON_004",
+      "title": "Verify Button Styling - Padding",
+      "description": "Ensure all button elements have 1rem padding.",
+      "source_document_reference": "CSS for 'button', line: padding: 1rem;"
+    },
+    {
+      "id": "UI_BUTTON_005",
+      "title": "Verify Button Styling - Font Size",
+      "description": "Ensure all button elements have a font size of 1.2rem.",
+      "source_document_reference": "CSS for 'button', line: font-size: 1.2rem;"
+    },
+    {
+      "id": "UI_BUTTON_006",
+      "title": "Verify Button Styling - Font Weight",
+      "description": "Ensure all button elements have bold font weight.",
+      "source_document_reference": "CSS for 'button', line: font-weight: bold;"
+    },
+    {
+      "id": "UI_BUTTON_007",
+      "title": "Verify Button Styling - Border Radius",
+      "description": "Ensure all button elements have a border-radius of 6px.",
+      "source_document_reference": "CSS for 'button', line: border-radius: 6px;"
+    },
+    {
+      "id": "UI_BUTTON_008",
+      "title": "Verify Button Styling - Top Margin",
+      "description": "Ensure all button elements have a margin-top of 2rem.",
+      "source_document_reference": "CSS for 'button', line: margin-top: 2rem;"
+    },
+    {
+      "id": "UI_BUTTON_009",
+      "title": "Verify Button Styling - Width",
+      "description": "Ensure all button elements have a width of 100%.",
+      "source_document_reference": "CSS for 'button', line: width: 100%;"
+    },
+    {
+      "id": "UI_PAYNOW_BUTTON_001",
+      "title": "Verify 'Pay Now' Button Existence and ID",
+      "description": "Ensure a button with the ID 'pay-now-btn' and text 'Pay Now' is present on the page.",
+      "source_document_reference": "HTML for button: <button id=\"pay-now-btn\">Pay Now</button>"
+    },
+    {
+      "id": "UI_H1_001",
+      "title": "Verify H1 Styling - Color",
+      "description": "Ensure all H1 elements have a text color of #2a9d8f (teal).",
+      "source_document_reference": "CSS for 'h1', line: color: #2a9d8f;"
+    },
+    {
+      "id": "UI_H1_002",
+      "title": "Verify H1 Styling - Text Alignment",
+      "description": "Ensure all H1 elements are text-aligned to the center.",
+      "source_document_reference": "CSS for 'h1', line: text-align: center;"
+    },
+    {
+      "id": "UI_CONTAINER_001",
+      "title": "Verify Container Styling - Max Width",
+      "description": "Ensure elements with class 'container' have a maximum width of 600px.",
+      "source_document_reference": "CSS for '.container', line: max-width: 600px;"
+    },
+    {
+      "id": "UI_CONTAINER_002",
+      "title": "Verify Container Styling - Auto Margin",
+      "description": "Ensure elements with class 'container' have auto margins (for horizontal centering).",
+      "source_document_reference": "CSS for '.container', line: margin: auto;"
+    },
+    {
+      "id": "UI_CONTAINER_003",
+      "title": "Verify Container Styling - Background",
+      "description": "Ensure elements with class 'container' have a white background.",
+      "source_document_reference": "CSS for '.container', line: background: white;"
+    },
+    {
+      "id": "UI_INPUT_001",
+      "title": "Verify Input Field Styling - Width",
+      "description": "Ensure input fields of type 'text', 'email', and 'number' have a width of 100%.",
+      "source_document_reference": "CSS for 'input[type=\"text\"], input[type=\"email\"], input[type=\"number\"]', line: width: 100%;"
+    },
+    {
+      "id": "UI_INPUT_002",
+      "title": "Verify Input Field Styling - Padding",
+      "description": "Ensure input fields of type 'text', 'email', and 'number' have 0.5rem padding.",
+      "source_document_reference": "CSS for 'input[type=\"text\"], input[type=\"email\"], input[type=\"number\"]', line: padding: 0.5rem;"
+    },
+    {
+      "id": "UI_INPUT_003",
+      "title": "Verify Input Field Styling - Top Margin",
+      "description": "Ensure input fields of type 'text', 'email', and 'number' have a margin-top of 0.3rem.",
+      "source_document_reference": "CSS for 'input[type=\"text\"], input[type=\"email\"], input[type=\"number\"]', line: margin-top: 0.3rem;"
+    },
+    {
+      "id": "UI_INPUT_004",
+      "title": "Verify Input Field Styling - Border Radius",
+      "description": "Ensure input fields of type 'text', 'email', and 'number' have a border-radius of 4px.",
+      "source_document_reference": "CSS for 'input[type=\"text\"], input[type=\"email\"], input[type=\"number\"]', line: border-radius: 4px;"
+    },
+    {
+      "id": "UI_INPUT_005",
+      "title": "Verify Input Field Styling - Border",
+      "description": "Ensure input fields of type 'text', 'email', and 'number' have a 1px solid #ccc border.",
+      "source_document_reference": "CSS for 'input[type=\"text\"], input[type=\"email\"], input[type=\"number\"]', line: border: 1px solid #ccc;"
+    },
+    {
+      "id": "UI_SUCCESS_MSG_001",
+      "title": "Verify Success Message Initial State",
+      "description": "Ensure the success message element with ID 'success-message' is initially hidden (display: none).",
+      "source_document_reference": "HTML for success message: <p id=\"success-message\" class=\"success-message\" style=\"display:none;\">Payment Successful!</p>"
+    },
+    {
+      "id": "UI_SUCCESS_MSG_002",
+      "title": "Verify Success Message Text",
+      "description": "Ensure the success message element contains the text 'Payment Successful!'.",
+      "source_document_reference": "HTML for success message: <p id=\"success-message\" class=\"success-message\" style=\"display:none;\">Payment Successful!</p>"
+    },
+    {
+      "id": "UI_GLOBAL_001",
+      "title": "Verify Global Margin",
+      "description": "Ensure the main content area or body has a margin of 2rem.",
+      "source_document_reference": "CSS (unscoped, likely body/global): margin: 2rem;"
+    },
+    {
+      "id": "UI_GLOBAL_002",
+      "title": "Verify Global Background Color",
+      "description": "Ensure the page background color is #f9f9f9.",
+      "source_document_reference": "CSS (unscoped, likely body/global): background: #f9f9f9;"
+    },
+    {
+      "id": "UI_GLOBAL_003",
+      "title": "Verify Global Text Color",
+      "description": "Ensure the default text color for the page is #333.",
+      "source_document_reference": "CSS (unscoped, likely body/global): color: #333;"
+    }
+  ]
+}

@@ -1,7 +1,9 @@
 import os
 import logging
-from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain.vectorstores import Chroma
+from langchain.llms import HuggingFaceHub
+from langchain.embeddings import HuggingFaceEmbeddings
+
 import requests
 import json
 
