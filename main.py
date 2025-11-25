@@ -23,11 +23,9 @@ HTML_DIR = "uploaded_html"
 os.makedirs(DOCS_DIR, exist_ok=True)
 os.makedirs(HTML_DIR, exist_ok=True)
 
-
 @app.get("/")
 def read_root():
     return {"message": "Autonomous QA Agent Backend is running!"}
-
 
 @app.post("/upload/documentation/")
 async def upload_documentation(file: UploadFile = File(...)):
@@ -37,7 +35,6 @@ async def upload_documentation(file: UploadFile = File(...)):
         f.write(contents)
     return {"filename": file.filename, "message": "Documentation uploaded successfully"}
 
-
 @app.post("/upload/html/")
 async def upload_html(file: UploadFile = File(...)):
     file_location = os.path.join(HTML_DIR, file.filename)
@@ -46,15 +43,12 @@ async def upload_html(file: UploadFile = File(...)):
         f.write(contents)
     return {"filename": file.filename, "message": "HTML file uploaded successfully"}
 
-
 class TestCaseRequest(BaseModel):
     user_query: str
-
 
 class TestCaseResponse(BaseModel):
     test_cases: str
     status: str
-
 
 @app.post("/generate-test-cases/", response_model=TestCaseResponse)
 async def generate_test_cases(request: TestCaseRequest):
@@ -66,7 +60,6 @@ async def generate_test_cases(request: TestCaseRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.get("/generate-selenium-script/")
 async def get_selenium_script(test_case_title: str, test_case_description: str):
     try:
@@ -74,7 +67,6 @@ async def get_selenium_script(test_case_title: str, test_case_description: str):
         return {"selenium_script": script_content}
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
-
 
 @app.get("/download-selenium-script/")
 async def download_selenium_script(
@@ -95,7 +87,6 @@ async def download_selenium_script(
         filename=filename,
         background=None
     )
-
 
 @app.post("/build-knowledge-base/")
 async def build_kb_endpoint(

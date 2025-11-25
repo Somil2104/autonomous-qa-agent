@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>E-Shop Checkout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+            background: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            color: #2a9d8f;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        input[type="number"] {
+            width: 60px;
+        }
+        .cart-summary {
+            background: #e0f7f4;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+        }
+        label {
+            font-weight: 600;
+            margin-top: 1rem;
+            display: block;
+        }
+        input[type="text"], input[type="email"], input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.3rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .error {
+            color: red;
+            font-size: 0.9rem;
+        }
+        .shipping-methods, .payment-methods {
+            margin-top: 1rem;
+        }
+        .shipping-methods label, .payment-methods label {
+            margin-right: 1.5rem;
+        }
+        button {
+            margin-top: 2rem;
+            width: 100%;
+            background-color: #2a9d8f;
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+        .success-message {
+            color: green;
+            font-weight: bold;
+            margin-top: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>E-Shop Checkout</h1>
+    <div class="container">
+        <!-- Products -->
+        <div class="product-item">
+            <span>Item A</span>
+            <input type="number" min="0" value="1" id="item-a-qty" />
+            <span>$20</span>
+        </div>
+        <div class="product-item">
+            <span>Item B</span>
+            <input type="number" min="0" value="2" id="item-b-qty" />
+            <span>$15</span>
+        </div>
+        <div class="product-item">
+            <span>Item C</span>
+            <input type="number" min="0" value="0" id="item-c-qty" />
+            <span>$30</span>
+        </div>
+
+        <!-- Discount Code -->
+        <label for="discount-code">Discount Code</label>
+        <input type="text" id="discount-code" placeholder="Enter discount code" />
+        <div id="discount-error" class="error"></div>
+
+        <!-- Cart Summary -->
+        <div class="cart-summary" id="cart-summary">
+            <strong>Cart Summary:</strong>
+            <p>Subtotal: $<span id="subtotal">0</span></p>
+            <p>Discount: $<span id="discount-amount">0</span></p>
+            <p>Shipping: $<span id="shipping-cost">0</span></p>
+            <p><strong>Total: $<span id="total-price">0</span></strong></p>
+        </div>
+
+        <!-- User Details -->
+        <label for="name">Name</label>
+        <input type="text" id="name" />
+        <div id="name-error" class="error"></div>
+        <label for="email">Email</label>
+        <input type="email" id="email" />
+        <div id="email-error" class="error"></div>
+        <label for="address">Address</label>
+        <input type="text" id="address" />
+        <div id="address-error" class="error"></div>
+
+        <!-- Shipping Method -->
+        <div class="shipping-methods">
+            <label>Shipping Method:</label>
+            <label><input type="radio" name="shipping" value="standard" checked /> Standard (Free)</label>
+            <label><input type="radio" name="shipping" value="express" /> Express ($10)</label>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="payment-methods">
+            <label>Payment Method:</label>
+            <label><input type="radio" name="payment" value="credit_card" checked /> Credit Card</label>
+            <label><input type="radio" name="payment" value="paypal" /> PayPal</label>
+        </div>
+
+        <button id="pay-now-btn">Pay Now</button>
+        <p id="success-message" class="success-message" style="display:none;">Payment Successful!</p>
+    </div>
+
+    <script>
+        const prices = { "item-a-qty": 20, "item-b-qty": 15, "item-c-qty": 30 };
+        const discountCodes = { "SAVE15": 0.15 };
+        const shippingCosts = { "standard": 0, "express": 10 };
+
+        function calculateTotal() {
+            let subtotal = 0;
+            for (let id in prices) {
+                const qty = parseInt(document.getElementById(id).value) || 0;
+                subtotal += qty * prices[id];
+            }
+
+            let discount = 0;
+            const discountInput = document.getElementById("discount-code").value.trim().toUpperCase();
+            const discountError = document.getElementById("discount-error");
+            discountError.textContent = "";
+            if (discountInput) {
+                if (discountCodes[discountInput]) {
+                    discount = subtotal * discountCodes[discountInput];
+                } else {
+                    discountError.textContent = "Invalid discount code.";
+                }
+            }
+
+            let shippingType = document.querySelector('input[name="shipping"]:checked').value;
+            let shippingCost = shippingCosts[shippingType];
+
+            let total = subtotal - discount + shippingCost;
+
+            document.getElementById("subtotal").textContent = subtotal.toFixed(2);
+            document.getElementById("discount-amount").textContent = discount.toFixed(2);
+            document.getElementById("shipping-cost").textContent = shippingCost.toFixed(2);
+            document.getElementById("total-price").textContent = total.toFixed(2);
+        }
+
+        function validateForm() {
+            let valid = true;
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const address = document.getElementById("address").value.trim();
+
+            document.getElementById("name-error").textContent = "";
+            document.getElementById("email-error").textContent = "";
+            document.getElementById("address-error").textContent = "";
+
+            if (!name) {
+                document.getElementById("name-error").textContent = "Name is required.";
+                valid = false;
+            }
+
+            if (!email || !/\S+@\S+\.\S+/.test(email)) {
+                document.getElementById("email-error").textContent = "Valid email is required.";
+                valid = false;
+            }
+
+            if (!address) {
+                document.getElementById("address-error").textContent = "Address is required.";
+                valid = false;
+            }
+
+            return valid;
+        }
+
+        // Event listeners for recalculating totals on input change
+        for (let id in prices) {
+            document.getElementById(id).addEventListener("change", calculateTotal);
+        }
+        document.getElementById("discount-code").addEventListener("input", calculateTotal);
+        const shippingRadios = document.querySelectorAll('input[name="shipping"]');
+        shippingRadios.forEach(radio => radio.addEventListener("change", calculateTotal));
+
+        // Initialize totals on load
+        calculateTotal();
+
+        // Pay Now button logic
+        document.getElementById("pay-now-btn").addEventListener("click", () => {
+            if (validateForm()) {
+                document.getElementById("success-message").style.display = "block";
+            } else {
+                document.getElementById("success-message").style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>

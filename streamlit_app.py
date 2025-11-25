@@ -19,10 +19,10 @@ uploaded_html = st.file_uploader(
 )
 
 if st.button("Upload Selected Files"):
-    if not uploaded_docs and not uploaded_html:
+    if (not uploaded_docs or len(uploaded_docs) == 0) and not uploaded_html:
         st.warning("Please select files to upload.")
     else:
-        for file in uploaded_docs + ([uploaded_html] if uploaded_html else []):
+        for file in (uploaded_docs if uploaded_docs else []) + ([uploaded_html] if uploaded_html else []):
             files = {'file': (file.name, file.getvalue())}
             url = f"{BACKEND_URL}/upload/html/" if file.name.endswith(".html") else f"{BACKEND_URL}/upload/documentation/"
             try:
@@ -42,7 +42,6 @@ if st.button("Build Knowledge Base"):
     doc_filenames = [f.name for f in uploaded_docs] if uploaded_docs else []
     html_filenames = [uploaded_html.name] if uploaded_html else []
 
-    # Debug print to verify filenames being sent
     st.write("Documentation filenames to send:", doc_filenames)
     st.write("HTML filenames to send:", html_filenames)
 

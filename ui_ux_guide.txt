@@ -1,0 +1,6 @@
+# UI/UX Guidelines
+
+- Form validation errors (e.g., required fields, invalid email) must be displayed in red font, below the respective input.
+- The "Pay Now" button must be green (#2a9d8f) to indicate primary action.
+- Success messages (e.g., "Payment Successful!") should appear in green and be prominently visible.
+- Input fields should have consistent padding and rounded borders for improved usability.
